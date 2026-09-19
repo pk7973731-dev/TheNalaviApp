@@ -700,7 +700,7 @@ async function generateAgriculturalAnswer(
       };
       const langName = langNames[lang] || 'Tamil';
 
-      const prompt = `You are PACS PECHU - VAO e-SEVAI Agriculture Assistant. You ONLY answer about Tamil Nadu Agricultural Schemes, PACS Cooperative Laws, VAO Services, Crop Insurance, KCC, PMFBY, PM-Kisan, Land Records.
+      const prompt = `You are Nalavi - VAO e-SEVAI Agriculture Assistant. You ONLY answer about Tamil Nadu Agricultural Schemes, PACS Cooperative Laws, VAO Services, Crop Insurance, KCC, PMFBY, PM-Kisan, Land Records.
 STRICT RULE: If user asks ANYTHING other than agriculture, you MUST REJECT.
 Keep tone like official gov.in portal - formal, short, helpful.
 Respond purely in ${langName}.

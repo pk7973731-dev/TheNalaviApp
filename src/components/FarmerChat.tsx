@@ -103,8 +103,8 @@ export const FarmerChat: React.FC<FarmerChatProps> = ({
       sender: 'ai',
       text:
         currentLanguage === 'ta'
-          ? 'வணக்கம் விவசாயி அவர்களே! நான் பாக்ஸ் பேச்சு (PACS PECHU) - VAO இ-சேவை வேளாண் உதவியாளர்.\n\n🌾 நான் தமிழ்நாடு அரசு வேளாண் திட்டங்கள், PACS கூட்டுறவு சங்க சட்டங்கள் (பிரிவு 21), VAO பட்டா/சிட்டா/அடங்கல் சேவைகள், PMFBY பயிர் காப்பீடு மற்றும் KCC பயிர் கடன் பற்றி மட்டுமே பதிலளிப்பேன்.\n\n🎙️ கீழே உள்ள பெரிய பச்சை மைக் (MIC) பொத்தானை ஒருமுறை தொட்டு பேசலாம் அல்லது உங்கள் விவசாயக் கேள்வியை தட்டச்சு செய்யலாம்.'
-          : 'Greetings! I am PACS PECHU - VAO e-SEVAI Agriculture Assistant.\n\n🌾 I strictly assist with Tamil Nadu Agricultural Schemes, PACS Cooperative Laws (Section 21 & By-laws), VAO Land Records (Patta, Chitta, Adangal), PMFBY Crop Insurance, and KCC crop loans.\n\n🎙️ Single-tap the Big Green MIC button below to speak directly in your language, or type your question below.',
+          ? 'வணக்கம் விவசாயி அவர்களே! நான் நலவி (Nalavi) - VAO இ-சேவை வேளாண் உதவியாளர்.\n\n🌾 நான் தமிழ்நாடு அரசு வேளாண் திட்டங்கள், கூட்டுறவு சங்க சட்டங்கள் (பிரிவு 21), VAO பட்டா/சிட்டா/அடங்கல் சேவைகள், PMFBY பயிர் காப்பீடு மற்றும் KCC பயிர் கடன் பற்றி மட்டுமே பதிலளிப்பேன்.\n\n🎙️ கீழே உள்ள பெரிய பச்சை மைக் (MIC) பொத்தானை ஒருமுறை தொட்டு பேசலாம் அல்லது உங்கள் விவசாயக் கேள்வியை தட்டச்சு செய்யலாம்.'
+          : 'Greetings! I am Nalavi - VAO e-SEVAI Agriculture Assistant.\n\n🌾 I strictly assist with Tamil Nadu Agricultural Schemes, Cooperative Laws (Section 21 & By-laws), VAO Land Records (Patta, Chitta, Adangal), PMFBY Crop Insurance, and KCC crop loans.\n\n🎙️ Single-tap the Big Green MIC button below to speak directly in your language, or type your question below.',
       language: currentLanguage,
       timestamp: new Date().toISOString(),
     };
@@ -215,7 +215,7 @@ export const FarmerChat: React.FC<FarmerChatProps> = ({
     setMessages((prev) => [...prev, tempUserMsg]);
 
     // STRICT GUARD: If user asks ANYTHING other than agriculture, REJECT immediately.
-    // Guardrail Check: PACS PECHU strict agriculture verification (only for inquiry turns)
+    // Guardrail Check: Nalavi strict agriculture verification (only for inquiry turns)
     if (registrationStep === 'initial_query' || registrationStep === 'completed') {
       const detectedLang = resolveDetectedLanguage(userText, currentLanguage);
       if (!isValidQuery(userText)) {

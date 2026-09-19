@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <span className="text-xl sm:text-2xl font-black tracking-tight text-emerald-900 font-serif">
-                Nalavi <span className="text-stone-700 font-medium text-base">| PACS PECHU (பாக்ஸ் பேச்சு)</span>
+                Nalavi
               </span>
               <span className="bg-emerald-100 text-emerald-900 text-xs px-2 py-0.5 rounded-sm font-semibold uppercase tracking-wider border border-emerald-300">
                 VAO e-SEVAI Assistant

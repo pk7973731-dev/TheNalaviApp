@@ -1,4 +1,4 @@
-// PACS PECHU - VAO e-SEVAI Agriculture Whitelist & Guard
+// Nalavi - VAO e-SEVAI Agriculture Whitelist & Guard
 
 export const VALID_KEYWORDS = [
   // User specified core keywords
