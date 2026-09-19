@@ -125,6 +125,7 @@ export const VaoPortal: React.FC<VaoPortalProps> = ({
 
   const redFlagCount = conversations.filter((c) => c.hasRedFlagLoanComplaint).length;
   const orangeTagCount = conversations.filter((c) => c.hasOrangeTagAgriQuery).length;
+  const inspectedVillage = COIMBATORE_VILLAGES.find((v) => v.name === selectedVillage) || currentVao;
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 flex flex-col min-h-[calc(100vh-70px)]">
@@ -138,20 +139,20 @@ export const VaoPortal: React.FC<VaoPortalProps> = ({
             <div>
               <div className="flex items-center space-x-2">
                 <h1 className="text-lg sm:text-xl font-black text-stone-900 font-serif">
-                  {currentVao.vaoOfficerName}
+                  {inspectedVillage.vaoOfficerName}
                 </h1>
                 <span className="bg-emerald-100 text-emerald-900 text-xs px-2 py-0.5 rounded font-semibold border border-emerald-300">
-                  அங்கீகரிக்கப்பட்ட VAO அதிகாரி
+                  கிராம எண் #{inspectedVillage.id || '1'} • VAO அதிகாரி
                 </span>
               </div>
               <p className="text-xs text-stone-600 font-medium mt-0.5">
-                கிராம நிர்வாக அலுவலகம்: <span className="font-bold text-stone-900">{currentVao.name}</span> | வட்டம்:{' '}
-                <span className="font-bold text-stone-900">{currentVao.taluk}</span> | மாவட்டம்: கோவை
+                கிராம நிர்வாக அலுவலகம்: <span className="font-bold text-stone-900">{inspectedVillage.nameTa} ({inspectedVillage.name})</span> | வட்டம்:{' '}
+                <span className="font-bold text-stone-900">{inspectedVillage.taluk.includes('south') ? 'கோவை தெற்கு' : 'கோவை வடக்கு'}</span> | மாவட்டம்: கோவை
               </p>
               <div className="flex items-center space-x-3 text-xs text-stone-500 mt-1">
-                <span>அரசு ஐடி: <strong className="text-stone-700">{currentVao.vaoUsername}</strong></span>
+                <span>அரசு ஐடி: <strong className="text-stone-700">{inspectedVillage.vaoUsername}</strong></span>
                 <span>•</span>
-                <span>அலுவலக தொடர்பு: <strong className="text-stone-700">{currentVao.vaoPhone}</strong></span>
+                <span>அலுவலக தொடர்பு: <strong className="text-stone-700">{inspectedVillage.vaoPhone}</strong></span>
               </div>
             </div>
           </div>
@@ -159,15 +160,15 @@ export const VaoPortal: React.FC<VaoPortalProps> = ({
           {/* Quick Actions & Village Switcher for Testing 20 Villages */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center space-x-1.5 text-xs bg-stone-50 border border-stone-300 p-1.5 rounded">
-              <span className="text-stone-600 font-medium">பார்வை கிராமம்:</span>
+              <span className="text-stone-700 font-bold">கிராம போர்ட்டல் (20 Villages):</span>
               <select
                 value={selectedVillage}
                 onChange={(e) => setSelectedVillage(e.target.value)}
-                className="font-bold text-stone-800 bg-white border border-stone-300 rounded px-1.5 py-0.5 focus:outline-hidden"
+                className="font-bold text-stone-800 bg-white border border-stone-300 rounded px-1.5 py-1 focus:outline-hidden text-xs"
               >
                 {COIMBATORE_VILLAGES.map((v) => (
-                  <option key={v.normalizedName} value={v.name}>
-                    {v.name} ({v.taluk.includes('south') ? 'South' : 'North'})
+                  <option key={v.id} value={v.name}>
+                    #{v.id} - {v.nameTa} ({v.name}) • {v.taluk.includes('south') ? 'தெற்கு' : 'வடக்கு'}
                   </option>
                 ))}
               </select>

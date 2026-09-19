@@ -19,6 +19,7 @@ export interface FarmerProfile {
   district: string;
   taluk: string;
   village: string;
+  villageId?: number;
   phone: string;
   createdAt: string;
   isOutsidePilot?: boolean;
@@ -36,10 +37,16 @@ export interface FarmerConversation {
 }
 
 export interface VillageInfo {
+  id: number;
+  code: string;
   name: string;
+  nameTa: string;
   normalizedName: string;
+  aliases?: string[];
   taluk: 'Coimbatore south' | 'Coimbatore north';
+  talukTa?: string;
   district: 'Coimbatore';
+  districtTa?: string;
   vaoUsername: string;
   defaultPassword: string;
   vaoOfficerName: string;

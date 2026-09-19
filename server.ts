@@ -6,7 +6,7 @@ import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import pg from 'pg';
 import { GoogleGenAI } from '@google/genai';
-import { COIMBATORE_VILLAGES, findVillageMatch, isValidPilotVillage } from './src/data/villages.ts';
+import { COIMBATORE_VILLAGES, findVillageMatch, isValidPilotVillage, get20VillagesListText } from './src/data/villages.ts';
 import { AGRICULTURAL_SCHEMES, findMatchingSchemes } from './src/data/schemes.ts';
 import { FarmerConversation, Message, FarmerProfile } from './src/types.ts';
 import { isValidQuery, getInvalidMessage, resolveDetectedLanguage, EXACT_INVALID_MESSAGES } from './src/utils/agriGuard.ts';
@@ -60,6 +60,10 @@ function loadLocalDb() {
     if (fs.existsSync(LOCAL_DB_FILE)) {
       const raw = fs.readFileSync(LOCAL_DB_FILE, 'utf-8');
       localDb = JSON.parse(raw);
+      if (!localDb.farmers || Object.keys(localDb.farmers).length <= 1) {
+        seedInitialData();
+        saveLocalDb();
+      }
     } else {
       seedInitialData();
       saveLocalDb();
@@ -72,7 +76,25 @@ function loadLocalDb() {
 
 function saveLocalDb() {
   try {
-    fs.writeFileSync(LOCAL_DB_FILE, JSON.stringify(localDb, null, 2), 'utf-8');
+    // Strictly do NOT persist non-pilot or unverified farmers to disk!
+    const cleanFarmers: Record<string, FarmerProfile> = {};
+    for (const [id, f] of Object.entries(localDb.farmers)) {
+      if (!f.isOutsidePilot && f.village && f.village !== 'Not Specified') {
+        cleanFarmers[id] = f;
+      }
+    }
+    const cleanConversations: Record<string, FarmerConversation> = {};
+    for (const [id, c] of Object.entries(localDb.conversations)) {
+      if (c.farmer && !c.farmer.isOutsidePilot && c.farmer.village && c.farmer.village !== 'Not Specified') {
+        cleanConversations[id] = c;
+      }
+    }
+    const toSave = {
+      conversations: cleanConversations,
+      farmers: cleanFarmers,
+      vaoNotes: localDb.vaoNotes || {},
+    };
+    fs.writeFileSync(LOCAL_DB_FILE, JSON.stringify(toSave, null, 2), 'utf-8');
   } catch (err) {
     console.error('Error saving local DB:', err);
   }
@@ -145,23 +167,25 @@ async function initPostgresSchema() {
 }
 
 function seedInitialData() {
-  // Seed a sample farmer case in Vadavalli to showcase the VAO portal immediately
-  const sampleFarmerId = 'farmer_sample_01';
-  const sampleConvId = 'conv_sample_01';
-  localDb.farmers[sampleFarmerId] = {
-    id: sampleFarmerId,
-    name: 'முத்துசாமி (Muthusamy)',
+  // Seed sample cases across distinct villages (e.g. #5 Thondamuthur, #17 Thudiyalur, #10 Perur)
+  // to clearly demonstrate that each VAO portal only shows their respective village farmers!
+  const farmer1Id = 'farmer_sample_01';
+  const conv1Id = 'conv_sample_01';
+  localDb.farmers[farmer1Id] = {
+    id: farmer1Id,
+    name: 'பழனிசாமி (Palanisamy)',
     district: 'Coimbatore',
     taluk: 'Coimbatore south',
-    village: 'Vadavalli',
+    village: 'Thondamuthur',
+    villageId: 5,
     phone: '9842154321',
     createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
     isOutsidePilot: false,
   };
 
-  localDb.conversations[sampleConvId] = {
-    id: sampleConvId,
-    farmer: localDb.farmers[sampleFarmerId],
+  localDb.conversations[conv1Id] = {
+    id: conv1Id,
+    farmer: localDb.farmers[farmer1Id],
     initialQuery: 'நான் 3 ஏக்கர் நெல் சாகுபடி செய்துள்ளேன். தொடக்க வேளாண் கூட்டுறவு வங்கியில் கிசான் கடன் அட்டை (KCC) பயிர் கடன் கேட்டேன், மேனேஜர் நிராகரித்து விட்டார். எனக்கு அவசரமாக கடன் தேவை.',
     registrationStep: 'completed',
     hasRedFlagLoanComplaint: true,
@@ -179,98 +203,24 @@ function seedInitialData() {
       {
         id: 'm2',
         sender: 'ai',
-        text: 'வணக்கம்! உங்கள் கேள்வியை பதிவு செய்து கொண்டேன். அரசு வழிகாட்டுதலின்படி, உங்கள் கேள்விக்கு பதிலளிக்கும் முன் உங்கள் விவரங்களை பதிவு செய்ய வேண்டும். முதலாவதாக, உங்கள் முழு பெயரை சொல்லவும்.',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.9).toISOString(),
-      },
-      {
-        id: 'm3',
-        sender: 'farmer',
-        text: 'முத்துசாமி',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.8).toISOString(),
-        audioSpoken: true,
-      },
-      {
-        id: 'm4',
-        sender: 'ai',
-        text: 'நன்றி முத்துசாமி ஐயா. நீங்கள் எந்த மாவட்டத்தைச் சேர்ந்தவர்?',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.7).toISOString(),
-      },
-      {
-        id: 'm5',
-        sender: 'farmer',
-        text: 'கோயம்புத்தூர்',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.6).toISOString(),
-        audioSpoken: true,
-      },
-      {
-        id: 'm6',
-        sender: 'ai',
-        text: 'உங்கள் வட்டம் (Taluk) எது? (கோவை தெற்கு / கோவை வடக்கு)',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.5).toISOString(),
-      },
-      {
-        id: 'm7',
-        sender: 'farmer',
-        text: 'கோவை தெற்கு',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.4).toISOString(),
-        audioSpoken: true,
-      },
-      {
-        id: 'm8',
-        sender: 'ai',
-        text: 'உங்கள் கிராமத்தின் பெயர் என்ன?',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.3).toISOString(),
-      },
-      {
-        id: 'm9',
-        sender: 'farmer',
-        text: 'வடவள்ளி (Vadavalli)',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.2).toISOString(),
-        audioSpoken: true,
-      },
-      {
-        id: 'm10',
-        sender: 'ai',
-        text: 'வடவள்ளி கிராம நிர்வாக அலுவலகத்தின் கீழ் பதிவு செய்யப்பட்டது. இறுதியாக கிராம நிர்வாக அலுவலர் (VAO) தொடர்புகொள்ள உங்கள் 10 இலக்க மொபைல் எண்ணை தெரிவிக்கவும்.',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3.1).toISOString(),
-      },
-      {
-        id: 'm11',
-        sender: 'farmer',
-        text: '9842154321',
-        language: 'ta',
-        timestamp: new Date(Date.now() - 3600000 * 3).toISOString(),
-        audioSpoken: true,
-      },
-      {
-        id: 'm12',
-        sender: 'ai',
-        text: 'உங்கள் பதிவு வெற்றிகரமாக முடிந்தது! இப்போது நீங்கள் கேட்ட கிசான் கடன் அட்டை (KCC) பிரச்சனைக்கு தீர்வு:\n\nமத்திய ரிசர்வ் வங்கி விதிகளின்படி ₹1.60 லட்சம் வரை எந்த ஒரு நில பத்திர பிணையமும் இன்றி பயிர் கடன் வழங்க வேண்டும். வங்கி மேனேஜர் நிராகரிப்பது அரசு விதிகளுக்கு எதிரானது.\n\n⚠️ உங்களின் இந்த கடன் புகார் RED FLAG முன்னுரிமையுடன் வடவள்ளி கிராம நிர்வாக அலுவலர் (VAO) திரு. K. ராஜேந்திரன் அவர்களுக்கு அனுப்பப்பட்டுள்ளது. அவர் உங்களை 9842154321 என்ற எண்ணில் தொலைபேசியில் தொடர்புகொண்டு கூட்டுறவு வங்கியில் கடன் பெற்றுத்தர நேரடி விசாரணை மேற்கொள்வார்.',
+        text: 'உங்கள் கடன் புகார் RED FLAG முன்னுரிமையுடன் பதிவு செய்யப்பட்டது. மத்திய ரிசர்வ் வங்கி விதிகளின்படி ₹1.60 லட்சம் வரை எந்த ஒரு நில பத்திர பிணையமும் இன்றி பயிர் கடன் வழங்க வேண்டும்.\n\n⚠️ உங்களின் இந்த அவசர புகார் தொண்டாமுத்தூர் கிராம நிர்வாக அலுவலர் (Thiru. R. Velusamy, VAO) பார்வைக்கு அனுப்பப்பட்டுள்ளது. அவர் உங்களை 9842154321 எண்ணில் தொடர்புகொள்வார்.',
         language: 'ta',
         flag: 'red',
-        timestamp: new Date(Date.now() - 3600000 * 2.9).toISOString(),
+        timestamp: new Date(Date.now() - 3600000 * 3.8).toISOString(),
       },
     ],
   };
 
-  // Sample Orange Tag query in Thondamuthur
+  // Sample query in Thudiyalur (Village #17 - Coimbatore North)
   const farmer2Id = 'farmer_sample_02';
   const conv2Id = 'conv_sample_02';
   localDb.farmers[farmer2Id] = {
     id: farmer2Id,
-    name: 'கருப்பசாமி (Karuppasamy)',
+    name: 'முருகேசன் (Murugesan)',
     district: 'Coimbatore',
-    taluk: 'Coimbatore south',
-    village: 'Thondamuthur',
+    taluk: 'Coimbatore north',
+    village: 'Thudiyalur',
+    villageId: 17,
     phone: '9443217890',
     createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
     isOutsidePilot: false,
@@ -295,7 +245,7 @@ function seedInitialData() {
       {
         id: 'm202',
         sender: 'ai',
-        text: 'சுருள் வெள்ளை ஈ கட்டுப்பாட்டுக்கு வேப்பெண்ணெய் கரைசல் 30 மிலி அல்லது வேப்பம் கொட்டை சாறு 5% தெளிக்கலாம். மஞ்சள் நிற ஒட்டும் பொறிகளை ஏக்கருக்கு 8 என்ற எண்ணிக்கையில் கட்டவும்.\n\n🔸 இந்த கள ஆலோசனை கேள்வி தொண்டாமுத்தூர் கிராம நிர்வாக அலுவலர் (VAO) பக்கத்தில் ORANGE TAG உடன் பகிரப்பட்டுள்ளது. வட்டார வேளாண் அலுவலர் பரிந்துரையும் உங்களுக்கு விரைவில் வழங்கப்படும்.',
+        text: 'சுருள் வெள்ளை ஈ கட்டுப்பாட்டுக்கு வேப்பெண்ணெய் கரைசல் 30 மிலி அல்லது வேப்பம் கொட்டை சாறு 5% தெளிக்கலாம். மஞ்சள் நிற ஒட்டும் பொறிகளை ஏக்கருக்கு 8 என்ற எண்ணிக்கையில் கட்டவும்.\n\n🔸 இந்த கள ஆலோசனை துடியலூர் கிராம நிர்வாக அலுவலர் (Thiru. V. Mohanraj, VAO) கவனத்திற்கு அனுப்பப்பட்டுள்ளது.',
         language: 'ta',
         flag: 'orange',
         timestamp: new Date(Date.now() - 3600000 * 7.5).toISOString(),
@@ -303,11 +253,52 @@ function seedInitialData() {
       {
         id: 'm203',
         sender: 'vao',
-        text: 'வணக்கம் முத்துசாமி. தொண்டாமுத்தூர் வேளாண்மை உதவி இயக்குநர் அலுவலகத்தில் கிரைசோபெர்லா (Chrysoperla) ஒட்டுண்ணி இலவசமாக வழங்கப்படுகிறது. நாளை காலை 10 மணிக்கு வட்டார அலுவலகத்தில் வந்து பெற்றுக்கொள்ளவும்.',
+        text: 'வணக்கம் முருகேசன். துடியலூர் வட்டார வேளாண்மை உதவி இயக்குநர் அலுவலகத்தில் கிரைசோபெர்லா (Chrysoperla) ஒட்டுண்ணி இலவசமாக வழங்கப்படுகிறது. நாளை வந்து பெற்றுக்கொள்ளலாம்.',
         language: 'ta',
         timestamp: new Date(Date.now() - 3600000 * 1).toISOString(),
-        vaoOfficerName: 'Thiru. R. Velusamy, VAO',
-        vaoVillage: 'Thondamuthur',
+        vaoOfficerName: 'Thiru. V. Mohanraj, VAO',
+        vaoVillage: 'Thudiyalur',
+      },
+    ],
+  };
+
+  // Sample query in Perur (Village #10 - Coimbatore South)
+  const farmer3Id = 'farmer_sample_03';
+  const conv3Id = 'conv_sample_03';
+  localDb.farmers[farmer3Id] = {
+    id: farmer3Id,
+    name: 'செல்வி (Selvi)',
+    district: 'Coimbatore',
+    taluk: 'Coimbatore south',
+    village: 'Perur',
+    villageId: 10,
+    phone: '9842188899',
+    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    isOutsidePilot: false,
+  };
+  localDb.conversations[conv3Id] = {
+    id: conv3Id,
+    farmer: localDb.farmers[farmer3Id],
+    initialQuery: 'பிரதமர் பயிர் காப்பீட்டுத் திட்டம் (PMFBY) பிரீமியம் செலுத்தும் கடைசி தேதி என்ன?',
+    registrationStep: 'completed',
+    hasRedFlagLoanComplaint: false,
+    hasOrangeTagAgriQuery: false,
+    lastUpdated: new Date(Date.now() - 3600000 * 5).toISOString(),
+    messages: [
+      {
+        id: 'm301',
+        sender: 'farmer',
+        text: 'பிரதமர் பயிர் காப்பீட்டுத் திட்டம் (PMFBY) பிரீமியம் செலுத்தும் கடைசி தேதி என்ன?',
+        language: 'ta',
+        timestamp: new Date(Date.now() - 3600000 * 12).toISOString(),
+      },
+      {
+        id: 'm302',
+        sender: 'ai',
+        text: '🌾 பிரதமர் பயிர் காப்பீட்டுத் திட்டம் (PMFBY):\n\nகாரீப் பருவ பயிர்களுக்கு 2% மற்றும் ராபி பருவ பயிர்களுக்கு 1.5% மட்டுமே விவசாயி பிரீமியம் செலுத்த வேண்டும்.\n\nதேவையான ஆவணங்கள்: அடங்கல், பட்டா, வங்கி கணக்கு புத்தகம், ஆதார் அட்டை. உங்கள் பேரூர் பொது சேவை மையம் (e-Sevai) அல்லது தொடக்க வேளாண் கூட்டுறவு வங்கியில் விண்ணப்பிக்கலாம்.',
+        language: 'ta',
+        flag: 'green',
+        timestamp: new Date(Date.now() - 3600000 * 11.8).toISOString(),
       },
     ],
   };
@@ -554,62 +545,80 @@ app.post('/api/farmer/message', async (req: Request, res: Response) => {
       conv.registrationStep = 'ask_taluk';
     } else if (conv.registrationStep === 'ask_taluk') {
       conv.farmer.taluk = cleanedText;
+      const villageListText = get20VillagesListText(detectedLang);
       if (detectedLang === 'ta') {
-        aiResponseText = `உங்கள் கிராமத்தின் பெயர் (Village Name) என்ன?`;
+        aiResponseText = `உங்கள் கிராமத்தின் பெயர் அல்லது கிராம எண் (1-20) என்ன?\n\n📍 எங்கள் நேரடி VAO இணைப்பில் உள்ள 20 முன்னோடி கிராமங்கள்:\n${villageListText}\n\n👉 மேலே உள்ள கிராம எண் (1 முதல் 20) அல்லது கிராமத்தின் பெயரை சொல்லவும் / தட்டச்சு செய்யவும்:\n(குறிப்பு: உங்கள் கிராமம் இதில் இல்லையென்றால் "இல்லை" அல்லது உங்கள் ஊரின் பெயரை கூறலாம்)`;
       } else if (detectedLang === 'hi') {
-        aiResponseText = `आपके गाँव का नाम (Village Name) क्या है?`;
-      } else if (detectedLang === 'te') {
-        aiResponseText = `మీ గ్రామం పేరు (Village Name) ఏమిటి?`;
-      } else if (detectedLang === 'kn') {
-        aiResponseText = `ನಿಮ್ಮ ಹಳ್ಳಿಯ ಹೆಸರು (Village Name) ಏನು?`;
-      } else if (detectedLang === 'ml') {
-        aiResponseText = `നിങ്ങളുടെ ഗ്രാമത്തിന്റെ പേര് (Village Name) എന്താണ്?`;
+        aiResponseText = `आपके गाँव का नाम या ग्राम संख्या (1-20) क्या है?\n\n📍 20 पायलट गाँव:\n${villageListText}\n\n👉 कृपया अपने गाँव का नंबर (1-20) या नाम बताएं:\n(यदि आपका गाँव इस सूची में नहीं है तो "अन्य" या अपने गाँव का नाम लिखें)`;
       } else {
-        aiResponseText = `What is your Village Name?`;
+        aiResponseText = `What is your Village Name or Village ID (1-20)?\n\n📍 20 Pilot Villages with Direct VAO Integration:\n${villageListText}\n\n👉 Please state your Village Number (1-20) or Village Name:\n(Note: If your village is not listed, you can say "None" or enter your village name)`;
       }
       conv.registrationStep = 'ask_village';
     } else if (conv.registrationStep === 'ask_village') {
       const villageMatch = findVillageMatch(cleanedText);
       if (villageMatch) {
+        // Pilot village matched!
         conv.farmer.village = villageMatch.name;
+        conv.farmer.villageId = villageMatch.id;
         conv.farmer.taluk = villageMatch.taluk;
         conv.farmer.district = villageMatch.district;
         conv.farmer.isOutsidePilot = false;
 
         if (detectedLang === 'ta') {
-          aiResponseText = `நன்றி. உங்கள் கிராமம் "${villageMatch.name}" (${villageMatch.taluk}) கண்டறியப்பட்டது.\n\nஇறுதியாக, கிராம நிர்வாக அலுவலர் (VAO) தேவைப்படும்போது உங்களை நேரடியாக தொடர்புகொள்ள உங்கள் 10 இலக்க மொபைல் எண்ணை தெரிவிக்கவும்:`;
+          aiResponseText = `நன்றி. உங்கள் கிராமம் [எண்: ${villageMatch.id}] "${villageMatch.nameTa} (${villageMatch.name})" (${villageMatch.taluk}) மற்றும் கிராம நிர்வாக அலுவலர் (${villageMatch.vaoOfficerName}) கண்டறியப்பட்டது.\n\nகிராம நிர்வாக அலுவலர் தேவைப்படும்போது உங்களை நேரடியாக தொடர்புகொள்ள உங்கள் 10 இலக்க மொபைல் எண்ணை தெரிவிக்கவும்:`;
         } else if (detectedLang === 'hi') {
-          aiResponseText = `धन्यवाद। आपका गाँव "${villageMatch.name}" (${villageMatch.taluk}) सत्यापित हुआ।\n\nअंत में, कृपया अपना 10 अंकों का मोबाइल नंबर दर्ज करें ताकि ग्राम प्रशासनिक अधिकारी (VAO) आपसे संपर्क कर सकें:`;
+          aiResponseText = `धन्यवाद। आपका गाँव [संख्या: ${villageMatch.id}] "${villageMatch.name}" (${villageMatch.taluk}) और संबंधित VAO अधिकारी (${villageMatch.vaoOfficerName}) सत्यापित हुए।\n\nकृपया अपना 10 अंकों का मोबाइल नंबर दर्ज करें ताकि VAO अधिकारी आपसे संपर्क कर सकें:`;
         } else if (detectedLang === 'te') {
-          aiResponseText = `ధన్యవాదాలు. మీ గ్రామం "${villageMatch.name}" (${villageMatch.taluk}) ధృవీకరించబడింది.\n\nచివరగా, VAO అధికారి మిమ్మల్ని సంప్రదించడానికి మీ 10 అంకెల మొబైల్ నంబర్ తెలియజేయండి:`;
+          aiResponseText = `ధన్యవాదాలు. మీ గ్రామం [నంబర్: ${villageMatch.id}] "${villageMatch.name}" (${villageMatch.taluk}) మరియు VAO అధికారి (${villageMatch.vaoOfficerName}) ధృవీకరించబడింది.\n\nచివరగా, VAO అధికారి మిమ్మల్ని సంప్రదించడానికి మీ 10 అంకెల మొబైల్ నంబర్ తెలియజేయండి:`;
         } else if (detectedLang === 'kn') {
-          aiResponseText = `ಧನ್ಯವಾದಗಳು. ನಿಮ್ಮ ಗ್ರಾಮ "${villageMatch.name}" (${villageMatch.taluk}) ದೃಢಪಟ್ಟಿದೆ.\n\nಕೊನೆಯದಾಗಿ, VAO ಅಧಿಕಾರಿ ಸಂಪರ್ಕಿಸಲು ನಿಮ್ಮ 10 ಅಂಕಿಗಳ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ತಿಳಿಸಿ:`;
+          aiResponseText = `ಧನ್ಯವಾದಗಳು. ನಿಮ್ಮ ಗ್ರಾಮ [ಸಂಖ್ಯೆ: ${villageMatch.id}] "${villageMatch.name}" (${villageMatch.taluk}) ಮತ್ತು VAO ಅಧಿಕಾರಿ (${villageMatch.vaoOfficerName}) ದೃಢಪಟ್ಟಿದೆ.\n\nಕೊನೆಯದಾಗಿ, VAO ಅಧಿಕಾರಿ ಸಂಪರ್ಕಿಸಲು ನಿಮ್ಮ 10 ಅಂಕಿಗಳ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ತಿಳಿಸಿ:`;
         } else if (detectedLang === 'ml') {
-          aiResponseText = `നന്ദി. നിങ്ങളുടെ ഗ്രാമം "${villageMatch.name}" (${villageMatch.taluk}) സ്ഥിരീകരിച്ചു.\n\nഅവസാനമായി, VAO ഉദ്യോഗസ്ഥൻ ബന്ധപ്പെടുന്നതിനായി നിങ്ങളുടെ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക:`;
+          aiResponseText = `നന്ദി. നിങ്ങളുടെ ഗ്രാമം [നമ്പർ: ${villageMatch.id}] "${villageMatch.name}" (${villageMatch.taluk}) കൂടാതെ VAO ഉദ്യോഗസ്ഥൻ (${villageMatch.vaoOfficerName}) സ്ഥിരീകരിച്ചു.\n\nഅവസാനമായി, VAO ഉദ്യോഗസ്ഥൻ ബന്ധപ്പെടുന്നതിനായി നിങ്ങളുടെ 10 അക്ക മൊബൈൽ നമ്പർ നൽകുക:`;
         } else {
-          aiResponseText = `Thank you. Village "${villageMatch.name}" under ${villageMatch.taluk} verified.\n\nLastly, please enter your 10-digit mobile number so the Village Administrative Officer (VAO) can reach you:`;
+          aiResponseText = `Thank you. Village [ID: ${villageMatch.id}] "${villageMatch.name}" under ${villageMatch.taluk} and VAO Officer (${villageMatch.vaoOfficerName}) verified.\n\nLastly, please enter your 10-digit mobile number so the Village Administrative Officer (VAO) can reach you:`;
         }
+        conv.registrationStep = 'ask_phone';
       } else {
-        // Outside the 20 pilot villages!
-        conv.farmer.village = cleanedText;
+        // VILLAGE NOT SPECIFIED OR OUTSIDE 20 PILOT VILLAGES
+        // User directive: "if the village note specifed say i can only answer you but i can't connect to any vao so only say answers to them but not store details"
+        conv.farmer.village = cleanedText || 'Not Specified';
         conv.farmer.isOutsidePilot = true;
+        conv.registrationStep = 'completed';
 
-        if (detectedLang === 'ta') {
-          aiResponseText = `குறிப்பு: தற்போது எங்களின் முன்னோடி அமைப்பில் கோவை தெற்கு மற்றும் வடக்கு வட்டாரங்களின் 20 கிராமங்கள் நேரடி VAO இணைப்பில் உள்ளன. மற்ற கிராமங்களுக்கு:\n\n"இப்போது உங்கள் கேள்விகளுக்கு மட்டுமே என்னால் பதிலளிக்க முடியும் (now I only can answer to your queries)"\n\nபதிவை முடிக்க உங்கள் 10 இலக்க மொபைல் எண்ணை தெரிவிக்கவும்:`;
-        } else if (detectedLang === 'hi') {
-          aiResponseText = `सूचना: वर्तमान में केवल 20 पायलट गाँव सीधे VAO पोर्टल से जुड़े हैं। अन्य गाँवों के लिए:\n\n"अब मैं केवल आपके प्रश्नों का उत्तर दे सकता हूँ (now I only can answer to your queries)"\n\nकृपया अपना 10 अंकों का मोबाइल नंबर प्रदान करें:`;
-        } else {
-          aiResponseText = `Notice: Currently, 20 pilot villages in Coimbatore are under active VAO portal routing. For other villages:\n\n"now I only can answer to your queries"\n\nPlease provide your 10-digit mobile number to complete registration:`;
+        // DO NOT STORE DETAILS IN DATABASE!
+        if (localDb.farmers[conv.farmer.id]) {
+          delete localDb.farmers[conv.farmer.id];
         }
+
+        let noticeMsg = '';
+        if (detectedLang === 'ta') {
+          noticeMsg = `மன்னிக்கவும், உங்கள் கிராமம் குறிப்பிடப்படவில்லை அல்லது எங்கள் 20 முன்னோடி (Pilot) கிராமங்களில் இல்லை.\n\n"இப்போது உங்கள் கேள்விகளுக்கு மட்டுமே என்னால் பதிலளிக்க முடியும், ஆனால் உங்களை எந்த கிராம நிர்வாக அலுவலருடனும் (VAO) இணைக்க முடியாது. உங்கள் விவரங்கள் எதுவும் சேமிக்கப்படாது (I can only answer you but I can't connect to any VAO so only saying answers to you, but not storing your details)."`;
+        } else if (detectedLang === 'hi') {
+          noticeMsg = `क्षमा करें, आपका गाँव निर्दिष्ट नहीं है या हमारे 20 पायलट गाँवों में नहीं है।\n\n"अब मैं केवल आपके प्रश्नों का उत्तर दे सकता हूँ लेकिन आपको किसी VAO से नहीं जोड़ सकता, और आपका विवरण सहेजा नहीं जाएगा (I can only answer you but I can't connect to any VAO so only saying answers to you, but not storing your details)."`;
+        } else {
+          noticeMsg = `Notice: Your village is not specified or is not among our 20 pilot VAO villages.\n\n"I can only answer you but I can't connect to any VAO so only saying answers to you, but not storing your details."`;
+        }
+
+        // DIRECTLY ANSWER INITIAL QUERY!
+        const initialQ = conv.initialQuery;
+        const answerDetails = await generateAgriculturalAnswer(initialQ, detectedLang, conv.farmer);
+        aiResponseText = `${noticeMsg}\n\n---\n🌾 ${detectedLang === 'ta' ? 'உங்கள் கேள்விக்கான நேரடி விளக்கம்' : 'Agricultural Guidance'}:\n\n${answerDetails.text}`;
+        flag = answerDetails.flag;
+
+        conv.hasRedFlagLoanComplaint = false;
+        conv.hasOrangeTagAgriQuery = false;
       }
-      conv.registrationStep = 'ask_phone';
     } else if (conv.registrationStep === 'ask_phone') {
       const cleanPhone = cleanedText.replace(/[^0-9]/g, '');
       conv.farmer.phone = cleanPhone || cleanedText;
       conv.registrationStep = 'completed';
 
-      // Save farmer to database
-      localDb.farmers[conv.farmer.id] = conv.farmer;
+      // DO NOT STORE DETAILS IF OUTSIDE PILOT!
+      if (!conv.farmer.isOutsidePilot) {
+        localDb.farmers[conv.farmer.id] = conv.farmer;
+      } else {
+        delete localDb.farmers[conv.farmer.id];
+      }
 
       // NOW AUTOMATICALLY ANSWER THE INITIAL QUERY!
       const initialQ = conv.initialQuery;
@@ -617,8 +626,10 @@ app.post('/api/farmer/message', async (req: Request, res: Response) => {
       aiResponseText = answerDetails.text;
       flag = answerDetails.flag;
 
-      if (flag === 'red') conv.hasRedFlagLoanComplaint = true;
-      if (flag === 'orange') conv.hasOrangeTagAgriQuery = true;
+      if (!conv.farmer.isOutsidePilot) {
+        if (flag === 'red') conv.hasRedFlagLoanComplaint = true;
+        if (flag === 'orange') conv.hasOrangeTagAgriQuery = true;
+      }
     } else {
       // ==========================================
       // STAGE 2: Already Logged In / Normal Query
@@ -674,10 +685,24 @@ async function generateAgriculturalAnswer(
   const officerName = villageMatch ? villageMatch.vaoOfficerName : 'கிராம நிர்வாக அலுவலர் (VAO)';
 
   if (isLoan) {
+    if (farmer.isOutsidePilot) {
+      if (lang === 'ta') {
+        return {
+          flag: 'red',
+          text: `🚩 பயிர் கடன் மற்றும் கிசான் கடன் அட்டை (KCC) அரசு சட்ட விதிகள்:\n\n1. ₹1.60 லட்சம் வரை எந்த ஒரு நில ஆவண பிணையமும் (No Land Pledge/Mortgage) இன்றி வங்கிகள் விவசாயிகளுக்கு பயிர் கடன் வழங்க வேண்டும் என மத்திய ரிசர்வ் வங்கி (RBI) மற்றும் நபார்டு உத்தரவிட்டுள்ளது.\n2. சரியான தவணையில் செலுத்தினால் 4% மட்டுமே குறைந்தபட்ச சலுகை வட்டி.\n3. தொடக்க வேளாண் கூட்டுறவு சங்கம் (PACS) சட்ட விதிகளின்படி தகுதியான எந்த ஒரு விவசாயிக்கும் பயிர் கடன் அல்லது உறுப்பினர் உரிமை மறுக்கப்படக்கூடாது.\n\n⚠️ அறிவிப்பு: உங்கள் கிராமம் எங்கள் 20 முன்னோடி VAO கிராமங்களில் இல்லாததால், உங்களை குறிப்பிட்ட கிராம நிர்வாக அலுவலருடன் (VAO) இணைக்க இயலவில்லை. நீங்கள் உங்கள் வட்டார வேளாண்மை உதவி இயக்குநர் அல்லது உங்கள் பகுதி VAO-வை நேரடியாக அணுகலாம். உங்கள் விவரங்கள் எதுவும் அமைப்பில் சேமிக்கப்படவில்லை.`,
+        };
+      } else {
+        return {
+          flag: 'red',
+          text: `🚩 Crop Loan & Kisan Credit Card (KCC) Mandate:\n\n1. RBI & NABARD mandate collateral-free crop loans up to ₹1,60,000 without requiring land mortgage or security.\n2. Subsidized interest rate is 4% on timely repayment.\n3. Under PACS bylaws, no eligible farmer can be denied crop credit.\n\n⚠️ Notice: As your village is not among the 20 pilot VAO villages, you cannot be connected to a direct VAO officer. Please visit your local Taluk Agricultural Office or local VAO directly. Your details have not been saved.`,
+        };
+      }
+    }
+
     if (lang === 'ta') {
       return {
         flag: 'red',
-        text: `🚩 உங்கள் கடன் குறைபாடு RED FLAG முன்னுரிமையுடன் பதிவு செய்யப்பட்டது!\n\nபயிர் கடன் மற்றும் கிசான் கடன் அட்டை (KCC) திட்டத்தின் கீழ்:\n1. ₹1.60 லட்சம் வரை எந்த ஒரு நில ஆவண பிணையமும் இன்றி வங்கிகள் விவசாயிகளுக்கு பயிர் கடன் வழங்க வேண்டும் என மத்திய ரிசர்வ் வங்கி உத்தரவிட்டுள்ளது.\n2. சரியான தவணையில் செலுத்தினால் 4% மட்டுமே குறைந்தபட்ச வட்டி.\n\n⚠️ உங்களின் இந்த அவசர புகார் உங்கள் கிராம நிர்வாக அலுவலர் (${officerName}, ${farmer.village}) பார்வைக்கு RED FLAG உடன் உடனடியாக அனுப்பப்பட்டுள்ளது. அவர் உங்களை (${farmer.phone || 'உங்கள் மொபைல்'}) எண்ணில் தொடர்புகொண்டு நேரடி விசாரணை நடத்தி வங்கியிடம் பேசி தீர்வு காண்பார்.`,
+        text: `🚩 உங்கள் கடன் குறைபாடு RED FLAG முன்னுரிமையுடன் பதிவு செய்யப்பட்டது!\n\nபயிர் கடன் மற்றும் கிசான் கடன் அட்டை (KCC) திட்டத்தின் கீழ்:\n1. ₹1.60 லட்சம் வரை எந்த ஒரு நில ஆவண பிணையமும் இன்றி வங்கிகள் விவசாயிகளுக்கு பயிர் கடன் வழங்க வேண்டும் என மத்திய ரிசர்வ் வங்கி உத்தரவிட்டுள்ளது.\n2. சரியான தவணையில் செலுத்தினால் 4% மட்டுமே குறைந்தபட்ச வட்டி.\n3. தொடக்க வேளாண் கூட்டுறவு சங்கம் (PACS) சட்டம் பிரிவு 21-ன் படி விவசாயி உறுப்பினர் உரிமையை வங்கிகள் மறுக்க முடியாது.\n\n⚠️ உங்களின் இந்த அவசர புகார் உங்கள் கிராம நிர்வாக அலுவலர் (${officerName}, ${villageMatch?.nameTa || farmer.village}) பார்வைக்கு RED FLAG உடன் உடனடியாக அனுப்பப்பட்டுள்ளது. அவர் உங்களை (${farmer.phone || 'உங்கள் மொபைல்'}) எண்ணில் தொடர்புகொண்டு நேரடி விசாரணை நடத்தி வங்கியிடம் பேசி தீர்வு காண்பார்.`,
       };
     } else {
       return {
@@ -744,11 +769,23 @@ Question: ${query}`;
 
   // General Agriculture Question (pests, disease, water, local seeds) -> ORANGE TAG
   if (lang === 'ta') {
+    if (farmer.isOutsidePilot) {
+      return {
+        flag: 'orange',
+        text: `🌾 விவசாய ஆலோசனை மற்றும் பயிர் பாதுகாப்பு வழிகாட்டல்:\n\nபயிர் பராமரிப்பு, பூச்சி மேலாண்மை மற்றும் உரப்பயன்பாட்டிற்கு இயற்கை வேப்பெண்ணெய் கரைசல் (30 மிலி/லிட்டர்) அல்லது பரிந்துரைக்கப்பட்ட பூச்சிக்கொல்லிகளை வேளாண் விரிவாக்க வழிகாட்டல்படி பயன்படுத்தவும். மண் பரிசோதனை பரிந்துரைப்படி சரிவிகித உரம் இடவும்.\n\n(குறிப்பு: உங்கள் கிராமம் 20 முன்னோடி கிராமங்களில் இல்லாததால் உங்களை எந்த VAO உடனும் இணைக்க இயலவில்லை. உங்கள் விவரங்கள் சேமிக்கப்படவில்லை).`,
+      };
+    }
     return {
       flag: 'orange',
-      text: `🔸 உங்கள் விவசாய ஆலோசனை கேள்விக்கு முதற்கட்ட தீர்வு:\n\nவிவசாயத்தில் பயிர் பராமரிப்பு, பூச்சி மேலாண்மை மற்றும் உரப்பயன்பாட்டிற்கு இயற்கை வேப்பெண்ணெய் கரைசல் (30 மிலி/லிட்டர்) அல்லது பரிந்துரைக்கப்பட்ட பூச்சிக்கொல்லிகளை வேளாண் விரிவாக்க அலுவலர் வழிகாட்டல்படி பயன்படுத்தவும்.\n\nஇந்த கேள்வி உங்கள் கிராம நிர்வாக அலுவலர் (${officerName}) மற்றும் வட்டார வேளாண் துறை பக்கத்தில் ORANGE TAG உடன் பகிரப்பட்டுள்ளது. கள அலுவலரின் சிறப்பு பதில் விரைவில் உங்கள் திரையில் தோன்றும்.`,
+      text: `🔸 உங்கள் விவசாய ஆலோசனை கேள்விக்கு முதற்கட்ட தீர்வு:\n\nவிவசாயத்தில் பயிர் பராமரிப்பு, பூச்சி மேலாண்மை மற்றும் உரப்பயன்பாட்டிற்கு இயற்கை வேப்பெண்ணெய் கரைசல் (30 மிலி/லிட்டர்) அல்லது பரிந்துரைக்கப்பட்ட பூச்சிக்கொல்லிகளை வேளாண் விரிவாக்க அலுவலர் வழிகாட்டல்படி பயன்படுத்தவும்.\n\nஇந்த கேள்வி உங்கள் கிராம நிர்வாக அலுவலர் (${officerName}, ${villageMatch?.nameTa || farmer.village}) மற்றும் வட்டார வேளாண் துறை பக்கத்தில் ORANGE TAG உடன் பகிரப்பட்டுள்ளது. கள அலுவலரின் சிறப்பு பதில் விரைவில் உங்கள் திரையில் தோன்றும்.`,
     };
   } else {
+    if (farmer.isOutsidePilot) {
+      return {
+        flag: 'orange',
+        text: `🌾 Agricultural Advisory Guidance:\n\nFor crop health, soil enrichment, and pest mitigation, adhere to recommended bio-fertilizers and integrated pest management (IPM) practices.\n\n(Notice: Since your village is outside the 20 pilot villages, you are not connected to a VAO officer and no details have been stored).`,
+      };
+    }
     return {
       flag: 'orange',
       text: `🔸 Preliminary Agricultural Advisory:\n\nFor crop health, soil enrichment, and pest mitigation, adhere to recommended bio-fertilizers and integrated pest management (IPM) practices.\n\nThis query has been flagged with an ORANGE TAG to the ${officerName} (${farmer.village}) and the Block Agricultural Officer. An official field reply will be updated directly to your conversation.`,
@@ -772,11 +809,13 @@ app.post('/api/vao/login', (req: Request, res: Response) => {
   const village = COIMBATORE_VILLAGES.find(
     (v) =>
       v.vaoUsername.toLowerCase() === cleanUser ||
-      v.normalizedName === cleanUser.replace('.gov.in', '')
+      v.normalizedName === cleanUser.replace('.gov.in', '') ||
+      `#${v.id}` === cleanUser ||
+      String(v.id) === cleanUser
   );
 
   if (!village) {
-    return res.status(401).json({ error: 'Invalid VAO Government Username. Must end in .gov.in' });
+    return res.status(401).json({ error: 'Invalid VAO Government Username. Must end in .gov.in or match pilot village ID' });
   }
 
   if (village.defaultPassword.toLowerCase() !== cleanPass && cleanPass !== 'admin123') {
@@ -786,8 +825,11 @@ app.post('/api/vao/login', (req: Request, res: Response) => {
   return res.json({
     token: `token_${village.normalizedName}`,
     officer: {
+      id: village.id,
+      code: village.code,
       username: village.vaoUsername,
       village: village.name,
+      villageTa: village.nameTa,
       taluk: village.taluk,
       district: village.district,
       officerName: village.vaoOfficerName,
@@ -803,12 +845,16 @@ app.get('/api/vao/farmers', (req: Request, res: Response) => {
   const convList = Object.values(localDb.conversations);
 
   const filtered = convList.filter((conv) => {
-    if (!conv.farmer || !conv.farmer.village) return false;
+    // REJECT non-pilot farmers: They are NOT stored and NOT visible to any VAO
+    if (!conv.farmer || !conv.farmer.village || conv.farmer.isOutsidePilot || conv.farmer.village === 'Not Specified') {
+      return false;
+    }
+
     if (villageParam && villageParam.toLowerCase() !== 'all') {
       const match = findVillageMatch(conv.farmer.village);
       const queryMatch = findVillageMatch(villageParam);
       if (match && queryMatch) {
-        return match.normalizedName === queryMatch.normalizedName;
+        return match.id === queryMatch.id || match.normalizedName === queryMatch.normalizedName;
       }
       return conv.farmer.village.toLowerCase() === villageParam.toLowerCase();
     }

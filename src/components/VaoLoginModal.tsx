@@ -14,8 +14,8 @@ export const VaoLoginModal: React.FC<VaoLoginModalProps> = ({
   onClose,
   onLoginSuccess,
 }) => {
-  const [username, setUsername] = useState('vadavalli.gov.in');
-  const [password, setPassword] = useState('vadavalli');
+  const [username, setUsername] = useState('thondamuthur.gov.in');
+  const [password, setPassword] = useState('thondamuthur');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -40,9 +40,16 @@ export const VaoLoginModal: React.FC<VaoLoginModalProps> = ({
 
       // Find village info
       const village = COIMBATORE_VILLAGES.find(
-        (v) => v.vaoUsername.toLowerCase() === username.trim().toLowerCase()
+        (v) =>
+          v.vaoUsername.toLowerCase() === username.trim().toLowerCase() ||
+          v.name.toLowerCase() === username.trim().toLowerCase() ||
+          `#${v.id}` === username.trim() ||
+          String(v.id) === username.trim()
       ) || {
+        id: data.officer.id || 1,
+        code: data.officer.code || 'V01',
         name: data.officer.village,
+        nameTa: data.officer.villageTa || data.officer.village,
         normalizedName: data.officer.village.toLowerCase().replace(/[^a-z0-9]/g, ''),
         taluk: data.officer.taluk,
         district: data.officer.district,
@@ -78,10 +85,10 @@ export const VaoLoginModal: React.FC<VaoLoginModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold font-serif leading-tight">
-                கிராம நிர்வாக அலுவலர் உள்நுழைவு
+                கிராம நிர்வாக அலுவலர் உள்நுழைவு (VAO Login)
               </h2>
               <p className="text-[11px] text-emerald-200 font-medium">
-                Village Administrative Officer (VAO) Portal | கோவை மாவட்டம்
+                Nalavi VAO Portal | 20 முன்னோடி கிராம நிர்வாக அலுவலர் போர்ட்டல்
               </p>
             </div>
           </div>
@@ -102,39 +109,38 @@ export const VaoLoginModal: React.FC<VaoLoginModalProps> = ({
           )}
 
           {/* Quick 1-Click Village Picker for convenient reviewer testing */}
-          <div className="bg-stone-50 border border-stone-200 p-3 rounded text-xs space-y-1.5">
+          <div className="bg-stone-50 border border-stone-200 p-3 rounded text-xs space-y-2">
             <div className="flex items-center justify-between font-bold text-stone-800">
-              <span>முன்னமைக்கப்பட்ட 20 VAO அலுவலர்கள் (Quick Demo Select):</span>
-              <span className="text-[10px] text-emerald-800 font-normal">20 Villages Available</span>
+              <span>அலுவலர் கிராமத்தை தேர்வு செய்க (Choose Pilot Village):</span>
+              <span className="text-[10px] bg-emerald-100 text-emerald-900 px-1.5 py-0.5 rounded font-bold">20 Villages</span>
             </div>
             <select
               onChange={(e) => {
-                const found = COIMBATORE_VILLAGES.find((v) => v.name === e.target.value);
+                const found = COIMBATORE_VILLAGES.find((v) => String(v.id) === e.target.value);
                 if (found) handleSelectPreconfiguredVillage(found);
               }}
               value={
-                COIMBATORE_VILLAGES.find((v) => v.vaoUsername === username)?.name || 'Vadavalli'
+                COIMBATORE_VILLAGES.find((v) => v.vaoUsername === username)?.id || 5
               }
-              className="w-full bg-white border border-stone-300 rounded p-1.5 text-xs text-stone-800 focus:outline-hidden font-medium"
+              className="w-full bg-white border border-stone-300 rounded p-2 text-xs text-stone-900 focus:outline-hidden font-medium"
             >
-              <optgroup label="Coimbatore South (15 Villages)">
+              <optgroup label="📍 கோவை தெற்கு வட்டம் (Coimbatore South - 15 Villages)">
                 {COIMBATORE_VILLAGES.filter((v) => v.taluk.includes('south')).map((v) => (
-                  <option key={v.name} value={v.name}>
-                    {v.name} ({v.vaoUsername})
+                  <option key={v.id} value={v.id}>
+                    #{v.id} - {v.nameTa} ({v.name}) • VAO: {v.vaoOfficerName}
                   </option>
                 ))}
               </optgroup>
-              <optgroup label="Coimbatore North (5 Villages)">
+              <optgroup label="📍 கோவை வடக்கு வட்டம் (Coimbatore North - 5 Villages)">
                 {COIMBATORE_VILLAGES.filter((v) => v.taluk.includes('north')).map((v) => (
-                  <option key={v.name} value={v.name}>
-                    {v.name} ({v.vaoUsername})
+                  <option key={v.id} value={v.id}>
+                    #{v.id} - {v.nameTa} ({v.name}) • VAO: {v.vaoOfficerName}
                   </option>
                 ))}
               </optgroup>
             </select>
-            <p className="text-[11px] text-stone-500">
-              பயனர்பெயர் விதிமுறை: <code className="bg-stone-200 px-1 rounded font-bold">village.gov.in</code> | கடவுச்சொல்:{' '}
-              <code className="bg-stone-200 px-1 rounded font-bold">village</code> (சிறிய எழுத்துக்கள்)
+            <p className="text-[11px] text-stone-500 leading-relaxed">
+              அரசு விதிமுறை: பயனர்பெயர்: <code className="bg-stone-200 px-1 rounded font-bold">ஊர்பெயர்.gov.in</code> (எ.கா: <code className="bg-stone-200 px-1 rounded font-bold">thondamuthur.gov.in</code>) | கடவுச்சொல்: <code className="bg-stone-200 px-1 rounded font-bold">thondamuthur</code>
             </p>
           </div>
 
