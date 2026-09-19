@@ -1,0 +1,453 @@
+{
+  "conversations": {
+    "conv_sample_01": {
+      "id": "conv_sample_01",
+      "farmer": {
+        "id": "farmer_sample_01",
+        "name": "முத்துசாமி (Muthusamy)",
+        "district": "Coimbatore",
+        "taluk": "Coimbatore south",
+        "village": "Vadavalli",
+        "phone": "9842154321",
+        "createdAt": "2026-09-19T17:40:10.848Z",
+        "isOutsidePilot": false
+      },
+      "initialQuery": "நான் 3 ஏக்கர் நெல் சாகுபடி செய்துள்ளேன். தொடக்க வேளாண் கூட்டுறவு வங்கியில் கிசான் கடன் அட்டை (KCC) பயிர் கடன் கேட்டேன், மேனேஜர் நிராகரித்து விட்டார். எனக்கு அவசரமாக கடன் தேவை.",
+      "registrationStep": "completed",
+      "hasRedFlagLoanComplaint": true,
+      "hasOrangeTagAgriQuery": false,
+      "lastUpdated": "2026-09-19T19:40:10.848Z",
+      "messages": [
+        {
+          "id": "m1",
+          "sender": "farmer",
+          "text": "நான் 3 ஏக்கர் நெல் சாகுபடி செய்துள்ளேன். தொடக்க வேளாண் கூட்டுறவு வங்கியில் கிசான் கடன் அட்டை (KCC) பயிர் கடன் கேட்டேன், மேனேஜர் நிராகரித்து விட்டார். எனக்கு அவசரமாக கடன் தேவை.",
+          "language": "ta",
+          "timestamp": "2026-09-19T17:40:10.848Z",
+          "audioSpoken": true
+        },
+        {
+          "id": "m2",
+          "sender": "ai",
+          "text": "வணக்கம்! உங்கள் கேள்வியை பதிவு செய்து கொண்டேன். அரசு வழிகாட்டுதலின்படி, உங்கள் கேள்விக்கு பதிலளிக்கும் முன் உங்கள் விவரங்களை பதிவு செய்ய வேண்டும். முதலாவதாக, உங்கள் முழு பெயரை சொல்லவும்.",
+          "language": "ta",
+          "timestamp": "2026-09-19T17:46:10.848Z"
+        },
+        {
+          "id": "m3",
+          "sender": "farmer",
+          "text": "முத்துசாமி",
+          "language": "ta",
+          "timestamp": "2026-09-19T17:52:10.848Z",
+          "audioSpoken": true
+        },
+        {
+          "id": "m4",
+          "sender": "ai",
+          "text": "நன்றி முத்துசாமி ஐயா. நீங்கள் எந்த மாவட்டத்தைச் சேர்ந்தவர்?",
+          "language": "ta",
+          "timestamp": "2026-09-19T17:58:10.848Z"
+        },
+        {
+          "id": "m5",
+          "sender": "farmer",
+          "text": "கோயம்புத்தூர்",
+          "language": "ta",
+          "timestamp": "2026-09-19T18:04:10.848Z",
+          "audioSpoken": true
+        },
+        {
+          "id": "m6",
+          "sender": "ai",
+          "text": "உங்கள் வட்டம் (Taluk) எது? (கோவை தெற்கு / கோவை வடக்கு)",
+          "language": "ta",
+          "timestamp": "2026-09-19T18:10:10.848Z"
+        },
+        {
+          "id": "m7",
+          "sender": "farmer",
+          "text": "கோவை தெற்கு",
+          "language": "ta",
+          "timestamp": "2026-09-19T18:16:10.848Z",
+          "audioSpoken": true
+        },
+        {
+          "id": "m8",
+          "sender": "ai",
+          "text": "உங்கள் கிராமத்தின் பெயர் என்ன?",
+          "language": "ta",
+          "timestamp": "2026-09-19T18:22:10.848Z"
+        },
+        {
+          "id": "m9",
+          "sender": "farmer",
+          "text": "வடவள்ளி (Vadavalli)",
+          "language": "ta",
+          "timestamp": "2026-09-19T18:28:10.848Z",
+          "audioSpoken": true
+        },
+        {
+          "id": "m10",
+          "sender": "ai",
+          "text": "வடவள்ளி கிராம நிர்வாக அலுவலகத்தின் கீழ் பதிவு செய்யப்பட்டது. இறுதியாக கிராம நிர்வாக அலுவலர் (VAO) தொடர்புகொள்ள உங்கள் 10 இலக்க மொபைல் எண்ணை தெரிவிக்கவும்.",
+          "language": "ta",
+          "timestamp": "2026-09-19T18:34:10.848Z"
+        },
+        {
+          "id": "m11",
+          "sender": "farmer",
+          "text": "9842154321",
+          "language": "ta",
+          "timestamp": "2026-09-19T18:40:10.848Z",
+          "audioSpoken": true
+        },
+        {
+          "id": "m12",
+          "sender": "ai",
+          "text": "உங்கள் பதிவு வெற்றிகரமாக முடிந்தது! இப்போது நீங்கள் கேட்ட கிசான் கடன் அட்டை (KCC) பிரச்சனைக்கு தீர்வு:\n\nமத்திய ரிசர்வ் வங்கி விதிகளின்படி ₹1.60 லட்சம் வரை எந்த ஒரு நில பத்திர பிணையமும் இன்றி பயிர் கடன் வழங்க வேண்டும். வங்கி மேனேஜர் நிராகரிப்பது அரசு விதிகளுக்கு எதிரானது.\n\n⚠️ உங்களின் இந்த கடன் புகார் RED FLAG முன்னுரிமையுடன் வடவள்ளி கிராம நிர்வாக அலுவலர் (VAO) திரு. K. ராஜேந்திரன் அவர்களுக்கு அனுப்பப்பட்டுள்ளது. அவர் உங்களை 9842154321 என்ற எண்ணில் தொலைபேசியில் தொடர்புகொண்டு கூட்டுறவு வங்கியில் கடன் பெற்றுத்தர நேரடி விசாரணை மேற்கொள்வார்.",
+          "language": "ta",
+          "flag": "red",
+          "timestamp": "2026-09-19T18:46:10.848Z"
+        }
+      ]
+    },
+    "conv_sample_02": {
+      "id": "conv_sample_02",
+      "farmer": {
+        "id": "farmer_sample_02",
+        "name": "கருப்பசாமி (Karuppasamy)",
+        "district": "Coimbatore",
+        "taluk": "Coimbatore south",
+        "village": "Thondamuthur",
+        "phone": "9443217890",
+        "createdAt": "2026-09-19T13:40:10.848Z",
+        "isOutsidePilot": false
+      },
+      "initialQuery": "தென்னை மரங்களில் சுருள் வெள்ளை ஈ தாக்குதல் அதிகமாக உள்ளது, என்ன மருந்து தெளிக்க வேண்டும்?",
+      "registrationStep": "completed",
+      "hasRedFlagLoanComplaint": false,
+      "hasOrangeTagAgriQuery": true,
+      "lastUpdated": "2026-09-19T20:40:10.848Z",
+      "messages": [
+        {
+          "id": "m201",
+          "sender": "farmer",
+          "text": "தென்னை மரங்களில் சுருள் வெள்ளை ஈ தாக்குதல் அதிகமாக உள்ளது, என்ன மருந்து தெளிக்க வேண்டும்?",
+          "language": "ta",
+          "timestamp": "2026-09-19T13:40:10.848Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m202",
+          "sender": "ai",
+          "text": "சுருள் வெள்ளை ஈ கட்டுப்பாட்டுக்கு வேப்பெண்ணெய் கரைசல் 30 மிலி அல்லது வேப்பம் கொட்டை சாறு 5% தெளிக்கலாம். மஞ்சள் நிற ஒட்டும் பொறிகளை ஏக்கருக்கு 8 என்ற எண்ணிக்கையில் கட்டவும்.\n\n🔸 இந்த கள ஆலோசனை கேள்வி தொண்டாமுத்தூர் கிராம நிர்வாக அலுவலர் (VAO) பக்கத்தில் ORANGE TAG உடன் பகிரப்பட்டுள்ளது. வட்டார வேளாண் அலுவலர் பரிந்துரையும் உங்களுக்கு விரைவில் வழங்கப்படும்.",
+          "language": "ta",
+          "flag": "orange",
+          "timestamp": "2026-09-19T14:10:10.848Z"
+        },
+        {
+          "id": "m203",
+          "sender": "vao",
+          "text": "வணக்கம் முத்துசாமி. தொண்டாமுத்தூர் வேளாண்மை உதவி இயக்குநர் அலுவலகத்தில் கிரைசோபெர்லா (Chrysoperla) ஒட்டுண்ணி இலவசமாக வழங்கப்படுகிறது. நாளை காலை 10 மணிக்கு வட்டார அலுவலகத்தில் வந்து பெற்றுக்கொள்ளவும்.",
+          "language": "ta",
+          "timestamp": "2026-09-19T20:40:10.848Z",
+          "vaoOfficerName": "Thiru. R. Velusamy, VAO",
+          "vaoVillage": "Thondamuthur"
+        }
+      ]
+    },
+    "conv_1789854121605_gn7b4": {
+      "id": "conv_1789854121605_gn7b4",
+      "farmer": {
+        "id": "farmer_1789854121605_u1app",
+        "name": "Pradeep",
+        "district": "Coimbatore",
+        "taluk": "Coimbatore south",
+        "village": "Vadavalli",
+        "phone": "7894563456",
+        "createdAt": "2026-09-19T21:42:01.605Z",
+        "isOutsidePilot": false
+      },
+      "initialQuery": "give me any government schemes",
+      "registrationStep": "completed",
+      "messages": [
+        {
+          "id": "m_1789854121605_f",
+          "sender": "farmer",
+          "text": "give me any government schemes",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:42:01.605Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854121605_ai",
+          "sender": "ai",
+          "text": "வணக்கம்! உங்கள் கேள்வியை (\"give me any government schemes...\") பதிவு செய்து கொண்டேன்.\n\n⚠️ அரசு வழிகாட்டுதலின்படி, உங்கள் கேள்விக்கு உடனடியாக பதிலளிக்கும் முன், உங்கள் பயனர் பதிவிற்கான சில முக்கிய விவரங்களை கேட்க உள்ளேன்.\n\nமுதலாவதாக, உங்கள் முழுப் பெயரை சொல்லவும் அல்லது தட்டச்சு செய்யவும்:",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:42:01.605Z",
+          "flag": null
+        },
+        {
+          "id": "m_1789854142228_f",
+          "sender": "farmer",
+          "text": "Pradeep",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:42:22.228Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854142228_ai",
+          "sender": "ai",
+          "text": "நன்றி Pradeep ஐயா. நீங்கள் எந்த மாவட்டத்தைச் சேர்ந்தவர்? (எ.கா: கோயம்புத்தூர் / Coimbatore)",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:42:22.228Z",
+          "flag": null
+        },
+        {
+          "id": "m_1789854162769_f",
+          "sender": "farmer",
+          "text": "coimbatore",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:42:42.769Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854162769_ai",
+          "sender": "ai",
+          "text": "உங்கள் வட்டம் (Taluk) எது? (கோவை தெற்கு / கோவை வடக்கு)",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:42:42.769Z",
+          "flag": null
+        },
+        {
+          "id": "m_1789854174507_f",
+          "sender": "farmer",
+          "text": "coimbatore south",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:42:54.507Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854174507_ai",
+          "sender": "ai",
+          "text": "உங்கள் கிராமத்தின் பெயர் (Village Name) என்ன?",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:42:54.507Z",
+          "flag": null
+        },
+        {
+          "id": "m_1789854181909_f",
+          "sender": "farmer",
+          "text": "vadavalli",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:43:01.909Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854181910_ai",
+          "sender": "ai",
+          "text": "நன்றி. உங்கள் கிராமம் \"Vadavalli\" (Coimbatore south) கண்டறியப்பட்டது.\n\nஇறுதியாக, கிராம நிர்வாக அலுவலர் (VAO) தேவைப்படும்போது உங்களை நேரடியாக தொடர்புகொள்ள உங்கள் 10 இலக்க மொபைல் எண்ணை தெரிவிக்கவும்:",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:43:01.910Z",
+          "flag": null
+        },
+        {
+          "id": "m_1789854194500_f",
+          "sender": "farmer",
+          "text": "7894563456",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:43:14.500Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854194501_ai",
+          "sender": "ai",
+          "text": "🔸 உங்கள் விவசாய ஆலோசனை கேள்விக்கு முதற்கட்ட தீர்வு:\n\nவிவசாயத்தில் பயிர் பராமரிப்பு, பூச்சி மேலாண்மை மற்றும் உரப்பயன்பாட்டிற்கு இயற்கை வேப்பெண்ணெய் கரைசல் (30 மிலி/லிட்டர்) அல்லது பரிந்துரைக்கப்பட்ட பூச்சிக்கொல்லிகளை வேளாண் விரிவாக்க அலுவலர் வழிகாட்டல்படி பயன்படுத்தவும்.\n\nஇந்த கேள்வி உங்கள் கிராம நிர்வாக அலுவலர் (Thiru. K. Rajendran, VAO) மற்றும் வட்டார வேளாண் துறை பக்கத்தில் ORANGE TAG உடன் பகிரப்பட்டுள்ளது. கள அலுவலரின் சிறப்பு பதில் விரைவில் உங்கள் திரையில் தோன்றும்.",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:43:14.501Z",
+          "flag": "orange"
+        }
+      ],
+      "hasRedFlagLoanComplaint": false,
+      "hasOrangeTagAgriQuery": true,
+      "lastUpdated": "2026-09-19T21:43:14.501Z"
+    },
+    "conv_1789854989296_1omk2": {
+      "id": "conv_1789854989296_1omk2",
+      "farmer": {
+        "id": "farmer_1789854989296_xbctg",
+        "name": "",
+        "district": "",
+        "taluk": "",
+        "village": "",
+        "phone": "",
+        "createdAt": "2026-09-19T21:56:29.296Z",
+        "isOutsidePilot": false
+      },
+      "initialQuery": "",
+      "registrationStep": "initial_query",
+      "messages": [
+        {
+          "id": "m_1789854989296_f",
+          "sender": "farmer",
+          "text": "Who is the prime minister?",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:56:29.296Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854989296_ai",
+          "sender": "ai",
+          "text": "🚫 மன்னிக்கவும், இது வேளாண் திட்டங்கள் சம்பந்தப்பட்ட கேள்வி அல்ல. நான் வேளாண் உதவி மற்றும் PACS சட்டங்கள் பற்றி மட்டுமே பதிலளிப்பேன். வேளாண் திட்டம் பற்றி கேளுங்கள். (எ.கா: PMFBY, KCC கடன், பட்டா நிலை)",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:56:29.296Z",
+          "flag": null
+        }
+      ],
+      "hasRedFlagLoanComplaint": false,
+      "hasOrangeTagAgriQuery": false,
+      "lastUpdated": "2026-09-19T21:56:29.296Z"
+    },
+    "conv_1789854992155_9hlrv": {
+      "id": "conv_1789854992155_9hlrv",
+      "farmer": {
+        "id": "farmer_1789854992155_e5hm3",
+        "name": "",
+        "district": "",
+        "taluk": "",
+        "village": "",
+        "phone": "",
+        "createdAt": "2026-09-19T21:56:32.155Z",
+        "isOutsidePilot": false
+      },
+      "initialQuery": "PMFBY பயிர் காப்பீடு விவரம் என்ன?",
+      "registrationStep": "ask_name",
+      "messages": [
+        {
+          "id": "m_1789854992155_f",
+          "sender": "farmer",
+          "text": "PMFBY பயிர் காப்பீடு விவரம் என்ன?",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:56:32.155Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854992156_ai",
+          "sender": "ai",
+          "text": "வணக்கம்! உங்கள் கேள்வியை (\"PMFBY பயிர் காப்பீடு விவரம் என்ன?...\") பதிவு செய்து கொண்டேன்.\n\n⚠️ அரசு வழிகாட்டுதலின்படி, உங்கள் கேள்விக்கு உடனடியாக பதிலளிக்கும் முன், உங்கள் பயனர் பதிவிற்கான சில முக்கிய விவரங்களை கேட்க உள்ளேன்.\n\nமுதலாவதாக, உங்கள் முழுப் பெயரை சொல்லவும் அல்லது தட்டச்சு செய்யவும்:",
+          "language": "ta",
+          "timestamp": "2026-09-19T21:56:32.156Z",
+          "flag": null
+        }
+      ],
+      "hasRedFlagLoanComplaint": false,
+      "hasOrangeTagAgriQuery": false,
+      "lastUpdated": "2026-09-19T21:56:32.156Z"
+    },
+    "conv_1789854994387_qcy2m": {
+      "id": "conv_1789854994387_qcy2m",
+      "farmer": {
+        "id": "farmer_1789854994387_tl8d3",
+        "name": "",
+        "district": "",
+        "taluk": "",
+        "village": "",
+        "phone": "",
+        "createdAt": "2026-09-19T21:56:34.387Z",
+        "isOutsidePilot": false
+      },
+      "initialQuery": "",
+      "registrationStep": "initial_query",
+      "messages": [
+        {
+          "id": "m_1789854994387_f",
+          "sender": "farmer",
+          "text": "Tell me a joke about movies",
+          "language": "en",
+          "timestamp": "2026-09-19T21:56:34.387Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789854994387_ai",
+          "sender": "ai",
+          "text": "🚫 Sorry, this is not related to agricultural schemes. I can only assist with agricultural schemes, PACS laws and VAO services. Please ask about a farming scheme. (Eg: PMFBY, KCC loan, Patta status)",
+          "language": "en",
+          "timestamp": "2026-09-19T21:56:34.387Z",
+          "flag": null
+        }
+      ],
+      "hasRedFlagLoanComplaint": false,
+      "hasOrangeTagAgriQuery": false,
+      "lastUpdated": "2026-09-19T21:56:34.387Z"
+    },
+    "conv_1789855000119_am2ca": {
+      "id": "conv_1789855000119_am2ca",
+      "farmer": {
+        "id": "farmer_1789855000119_jfdpx",
+        "name": "",
+        "district": "",
+        "taluk": "",
+        "village": "",
+        "phone": "",
+        "createdAt": "2026-09-19T21:56:40.119Z",
+        "isOutsidePilot": false
+      },
+      "initialQuery": "",
+      "registrationStep": "initial_query",
+      "messages": [
+        {
+          "id": "m_1789855000119_f",
+          "sender": "farmer",
+          "text": "क्रिकेट का मैच कब है?",
+          "language": "hi",
+          "timestamp": "2026-09-19T21:56:40.119Z",
+          "audioSpoken": false
+        },
+        {
+          "id": "m_1789855000119_ai",
+          "sender": "ai",
+          "text": "🚫 क्षमा करें, यह कृषि योजनाओं से संबंधित नहीं है। मैं केवल कृषि योजनाओं, PACS कानूनों और VAO सेवाओं के बारे में ही सहायता कर सकता हूँ। कृपया कृषि योजना के बारे में पूछें। (उदा: PMFBY, KCC ऋण, पट्टा स्थिति)",
+          "language": "hi",
+          "timestamp": "2026-09-19T21:56:40.119Z",
+          "flag": null
+        }
+      ],
+      "hasRedFlagLoanComplaint": false,
+      "hasOrangeTagAgriQuery": false,
+      "lastUpdated": "2026-09-19T21:56:40.119Z"
+    }
+  },
+  "farmers": {
+    "farmer_sample_01": {
+      "id": "farmer_sample_01",
+      "name": "முத்துசாமி (Muthusamy)",
+      "district": "Coimbatore",
+      "taluk": "Coimbatore south",
+      "village": "Vadavalli",
+      "phone": "9842154321",
+      "createdAt": "2026-09-19T17:40:10.848Z",
+      "isOutsidePilot": false
+    },
+    "farmer_sample_02": {
+      "id": "farmer_sample_02",
+      "name": "கருப்பசாமி (Karuppasamy)",
+      "district": "Coimbatore",
+      "taluk": "Coimbatore south",
+      "village": "Thondamuthur",
+      "phone": "9443217890",
+      "createdAt": "2026-09-19T13:40:10.848Z",
+      "isOutsidePilot": false
+    },
+    "farmer_1789854121605_u1app": {
+      "id": "farmer_1789854121605_u1app",
+      "name": "Pradeep",
+      "district": "Coimbatore",
+      "taluk": "Coimbatore south",
+      "village": "Vadavalli",
+      "phone": "7894563456",
+      "createdAt": "2026-09-19T21:42:01.605Z",
+      "isOutsidePilot": false
+    }
+  },
+  "vaoNotes": {}
+}
